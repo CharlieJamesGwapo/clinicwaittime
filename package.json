@@ -10,6 +10,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed-history": "tsx prisma/seed-history.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "qr:poster": "tsx scripts/generate-qr-poster.ts"
