@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ticketPosition } from "@/lib/queue";
-import { HeuristicPredictor } from "@/lib/predictor";
+import { estimateWaitMinutes } from "@/lib/eta";
 
 export async function GET(
   _req: Request,
@@ -12,12 +12,7 @@ export async function GET(
   if (!ticket) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const positionAhead = await ticketPosition(number);
-  const defaultMins = Number(
-    (await db.setting.findUnique({ where: { key: "default_consultation_minutes" } }))?.value ?? 15
-  );
-  const eta = new HeuristicPredictor({ defaultConsultationMinutes: defaultMins }).estimateMinutes({
-    positionAhead,
-  });
+  const eta = await estimateWaitMinutes(positionAhead);
 
   return NextResponse.json({
     number: ticket.number,

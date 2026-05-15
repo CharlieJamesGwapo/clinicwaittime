@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { nextTicketNumber } from "@/lib/ticket-number";
 import { ticketPosition } from "@/lib/queue";
-import { HeuristicPredictor } from "@/lib/predictor";
+import { estimateWaitMinutes } from "@/lib/eta";
 import { renderSms } from "@/lib/sms-templates";
 import { writeSmsLog } from "@/lib/sms";
 import { isPriorityType } from "@/lib/types";
@@ -24,11 +24,7 @@ export async function POST(req: NextRequest) {
   });
 
   const positionAhead = await ticketPosition(number);
-  const defaultMins = Number(
-    (await db.setting.findUnique({ where: { key: "default_consultation_minutes" } }))?.value ?? 15
-  );
-  const predictor = new HeuristicPredictor({ defaultConsultationMinutes: defaultMins });
-  const eta = predictor.estimateMinutes({ positionAhead });
+  const eta = await estimateWaitMinutes(positionAhead);
 
   const origin = req.nextUrl.origin;
   const statusUrl = `${origin}/q/${number}`;

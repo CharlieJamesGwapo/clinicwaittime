@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { ticketPosition } from "@/lib/queue";
-import { HeuristicPredictor } from "@/lib/predictor";
+import { estimateWaitMinutes } from "@/lib/eta";
 import { TicketStatusLive } from "./_live";
 
 export default async function TicketPage({
@@ -14,12 +14,7 @@ export default async function TicketPage({
   if (!ticket) notFound();
 
   const positionAhead = await ticketPosition(number);
-  const defaultMins = Number(
-    (await db.setting.findUnique({ where: { key: "default_consultation_minutes" } }))?.value ?? 15
-  );
-  const eta = new HeuristicPredictor({ defaultConsultationMinutes: defaultMins }).estimateMinutes({
-    positionAhead,
-  });
+  const eta = await estimateWaitMinutes(positionAhead);
 
   return (
     <main className="min-h-screen p-8 flex flex-col items-center gap-6">
