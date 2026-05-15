@@ -1,0 +1,46 @@
+// Clinic Wait-Time Tracker — Prisma schema
+// See docs/superpowers/specs/2026-05-15-clinic-wait-time-tracker-design.md §6
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Ticket {
+  id           String    @id @default(uuid())
+  number       String    @unique
+  patientName  String
+  phone        String
+  priorityType String    @default("NONE")
+  status       String    @default("WAITING")
+  createdAt    DateTime  @default(now())
+  calledAt     DateTime?
+  servedAt     DateTime?
+  completedAt  DateTime?
+  smsLogs      SmsLog[]
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  passwordHash String
+  role         String
+}
+
+model SmsLog {
+  id       String   @id @default(uuid())
+  ticketId String
+  ticket   Ticket   @relation(fields: [ticketId], references: [id])
+  phone    String
+  message  String
+  sentAt   DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
