@@ -32,6 +32,7 @@ npm run dev                                     # http://localhost:3000
 | `npm run db:seed` | Seed demo users + settings |
 | `npm run db:studio` | Open Prisma Studio (DB browser) |
 | `npm run qr:poster` | Generate `public/checkin-qr.png` pointing at `/checkin` |
+| `npm run db:seed-history` | Wipe tickets and backfill 7 days of demo history for `/admin` charts |
 
 ## Patient flow demo (Phase 2)
 
@@ -46,5 +47,6 @@ npm run dev                                     # http://localhost:3000
 - **Phase 1 (Foundation)** — complete (tag `phase-1-complete`). Next.js + Prisma + NextAuth scaffold with login and role-aware routing via `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`).
 - **Phase 2 (Patient flow + simulated SMS)** — complete (tag `phase-2-complete`). `/checkin`, `/q/[ticket]`, `/demo/sms-inbox`, and three API routes. SMS is simulated (logged to DB, rendered in the inbox panel) — see spec §8.3.
 - **Phase 3 (Staff dashboard + lobby + SSE)** — complete (tag `phase-3-complete`). Priority-window ordering, rolling-average ETA, `/staff` queue ops, `/display` lobby, and `/api/queue/stream` SSE — patient/inbox/lobby/staff all live-update through one event channel.
+- **Phase 4 (Admin analytics)** — complete (tag `phase-4-complete`). `/admin` Recharts dashboard (wait-time trend, arrival histogram, priority pie, stat cards), `/api/analytics`, CSV export at `/api/analytics/export`, and a `db:seed-history` script that backfills 7 days of plausible tickets so the charts are populated on first load.
 
 See `docs/superpowers/plans/` for upcoming phase plans.
