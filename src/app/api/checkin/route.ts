@@ -5,6 +5,7 @@ import { ticketPosition } from "@/lib/queue";
 import { estimateWaitMinutes } from "@/lib/eta";
 import { renderSms } from "@/lib/sms-templates";
 import { writeSmsLog } from "@/lib/sms";
+import { emitQueueUpdated } from "@/lib/events";
 import { isPriorityType } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
     estimatedWaitMinutes: eta,
   });
   await writeSmsLog({ ticketId: ticket.id, phone, message });
+  emitQueueUpdated();
 
   return NextResponse.json({ ticket }, { status: 201 });
 }
