@@ -14,19 +14,29 @@ export default function SmsInboxPage() {
   const [messages, setMessages] = useState<SmsMessage[]>([]);
 
   useEffect(() => {
-    const tick = async () => {
+    let cancelled = false;
+
+    const refresh = async () => {
       try {
         const res = await fetch("/api/sms-log", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
-        setMessages(data.messages);
+        if (!cancelled) setMessages(data.messages);
       } catch {
-        /* retry next tick */
+        /* retry */
       }
     };
-    tick();
-    const id = setInterval(tick, 2000);
-    return () => clearInterval(id);
+
+    refresh();
+
+    const es = new EventSource("/api/queue/stream");
+    es.addEventListener("queue_updated", refresh);
+    es.addEventListener("ready", refresh);
+
+    return () => {
+      cancelled = true;
+      es.close();
+    };
   }, []);
 
   return (
