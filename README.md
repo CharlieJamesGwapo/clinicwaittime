@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clinic Wait-Time Tracker
 
-## Getting Started
+Real-time queuing and wait-time monitoring web app for Philippine clinics. Built as the IS70 / ISS170 Technopreneurship project deliverable.
 
-First, run the development server:
+See `docs/superpowers/specs/2026-05-15-clinic-wait-time-tracker-design.md` for the full design.
+
+## Local setup
+
+Requires Node.js 20+.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local                      # edit if needed
+npx prisma migrate dev                          # creates SQLite db
+npm run db:seed                                 # seeds demo users
+npm run dev                                     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Demo accounts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Nurse Joey: `nurse@clinic.test` / `nurse123`
+- Dr. Santos: `admin@clinic.test` / `admin123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Script | What it does |
+|---|---|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Production build |
+| `npm test` | Run unit tests (Vitest) |
+| `npm run db:migrate` | Apply Prisma migrations |
+| `npm run db:seed` | Seed demo users + settings |
+| `npm run db:studio` | Open Prisma Studio (DB browser) |
 
-To learn more about Next.js, take a look at the following resources:
+## Project status
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Phase 1 (Foundation) — complete. Next.js + Prisma + NextAuth scaffold with login and role-aware routing via `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `docs/superpowers/plans/` for upcoming phase plans.
