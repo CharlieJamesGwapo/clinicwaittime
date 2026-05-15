@@ -45,5 +45,6 @@ npm run dev                                     # http://localhost:3000
 
 - **Phase 1 (Foundation)** — complete (tag `phase-1-complete`). Next.js + Prisma + NextAuth scaffold with login and role-aware routing via `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`).
 - **Phase 2 (Patient flow + simulated SMS)** — complete (tag `phase-2-complete`). `/checkin`, `/q/[ticket]`, `/demo/sms-inbox`, and three API routes. SMS is simulated (logged to DB, rendered in the inbox panel) — see spec §8.3.
+- **Phase 3 (Staff dashboard + lobby + SSE)** — complete (tag `phase-3-complete`). Priority-window ordering, rolling-average ETA, `/staff` queue ops, `/display` lobby, and `/api/queue/stream` SSE — patient/inbox/lobby/staff all live-update through one event channel.
 
 See `docs/superpowers/plans/` for upcoming phase plans.
