@@ -11,7 +11,8 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "qr:poster": "tsx scripts/generate-qr-poster.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
