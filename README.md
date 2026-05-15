@@ -31,9 +31,19 @@ npm run dev                                     # http://localhost:3000
 | `npm run db:migrate` | Apply Prisma migrations |
 | `npm run db:seed` | Seed demo users + settings |
 | `npm run db:studio` | Open Prisma Studio (DB browser) |
+| `npm run qr:poster` | Generate `public/checkin-qr.png` pointing at `/checkin` |
+
+## Patient flow demo (Phase 2)
+
+1. Run `npm run qr:poster` (one-off) to refresh the QR poster.
+2. Open `http://localhost:3000/demo/sms-inbox` in one tab — keep it open.
+3. Open `http://localhost:3000/checkin` in another tab, fill the form, submit.
+4. The patient lands on `/q/A-00X` with a live position counter (polls every 2s).
+5. The simulated SMS appears in the inbox tab within 2 seconds.
 
 ## Project status
 
-Phase 1 (Foundation) — complete. Next.js + Prisma + NextAuth scaffold with login and role-aware routing via `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`).
+- **Phase 1 (Foundation)** — complete (tag `phase-1-complete`). Next.js + Prisma + NextAuth scaffold with login and role-aware routing via `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`).
+- **Phase 2 (Patient flow + simulated SMS)** — complete (tag `phase-2-complete`). `/checkin`, `/q/[ticket]`, `/demo/sms-inbox`, and three API routes. SMS is simulated (logged to DB, rendered in the inbox panel) — see spec §8.3.
 
 See `docs/superpowers/plans/` for upcoming phase plans.
