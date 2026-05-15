@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Prisma SQLite dev database — regenerated via `npm run db:migrate && npm run db:seed`
+/prisma/dev.db
+/prisma/dev.db-journal
+
