@@ -25,6 +25,7 @@
     "dotenv": "^17.4.2",
     "lucide-react": "^1.16.0",
     "next": "16.2.6",
+    "next-auth": "^5.0.0-beta.31",
     "prisma": "^6.19.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
