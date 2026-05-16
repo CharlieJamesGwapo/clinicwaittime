@@ -1,12 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { StatusBadge } from "@/lib/labels";
 
 type Props = {
   number: string;
   initialStatus: string;
   initialPositionAhead: number;
   initialEstimatedWaitMinutes: number;
+};
+
+const STATUS_MESSAGE: Record<string, string> = {
+  WAITING: "You're in the queue. We'll text you when you're almost up.",
+  CALLED: "It's your turn! Please head to the consultation room.",
+  SERVING: "You're being seen now.",
+  DONE: "All done — thank you!",
+  SKIPPED: "Marked as no-show. Please check in again at the desk.",
+  DROPOUT: "Your ticket has expired. Please check in again.",
 };
 
 export function TicketStatusLive(props: Props) {
@@ -41,13 +51,39 @@ export function TicketStatusLive(props: Props) {
     };
   }, [props.number]);
 
+  const isActive = status === "WAITING" || status === "CALLED" || status === "SERVING";
+  const isCalled = status === "CALLED" || status === "SERVING";
+
   return (
-    <div className="flex flex-col items-center gap-2">
-      <p className="text-2xl">
-        Status: <strong>{status}</strong>
+    <div className="w-full flex flex-col items-center gap-6">
+      <StatusBadge status={status} />
+
+      {isActive && (
+        <div className="w-full grid grid-cols-2 gap-3">
+          <div
+            className={`rounded-xl p-5 border ${isCalled ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"}`}
+          >
+            <p className="text-xs uppercase tracking-widest text-slate-500">Ahead of you</p>
+            <p className="text-4xl font-semibold mt-1">{isCalled ? 0 : position}</p>
+          </div>
+          <div
+            className={`rounded-xl p-5 border ${isCalled ? "bg-emerald-50 border-emerald-200" : "bg-white border-slate-200"}`}
+          >
+            <p className="text-xs uppercase tracking-widest text-slate-500">Est. wait</p>
+            <p className="text-4xl font-semibold mt-1">
+              {isCalled ? "Now" : `~${eta}m`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <p
+        className={`text-center text-sm sm:text-base ${
+          isCalled ? "text-emerald-700 font-medium" : "text-slate-600"
+        }`}
+      >
+        {STATUS_MESSAGE[status] ?? "Status updated."}
       </p>
-      <p>{position} ticket(s) ahead of you</p>
-      <p>Estimated wait: ~{eta} min</p>
     </div>
   );
 }
