@@ -1,4 +1,14 @@
 import Link from "next/link";
+import {
+  UserPlus,
+  LogIn,
+  MessageSquare,
+  Tv,
+  Stethoscope,
+  BarChart3,
+  Users,
+  ArrowRight,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getServerLocale } from "@/lib/i18n/server";
@@ -26,10 +36,14 @@ export default async function Home() {
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/checkin">
-            <Button size="lg">{m.ctaPatient}</Button>
+            <Button size="lg" className="cursor-pointer">
+              <UserPlus className="h-5 w-5" aria-hidden="true" />
+              {m.ctaPatient}
+            </Button>
           </Link>
           <Link href="/login">
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="outline" className="cursor-pointer">
+              <LogIn className="h-5 w-5" aria-hidden="true" />
               {m.ctaLogin}
             </Button>
           </Link>
@@ -42,6 +56,7 @@ export default async function Home() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <PersonaCard
+            icon={<Users className="h-5 w-5" />}
             title={m.patientsTitle}
             blurb={m.patientsBlurb}
             cta={m.patientsCta}
@@ -49,6 +64,7 @@ export default async function Home() {
             tone="emerald"
           />
           <PersonaCard
+            icon={<Stethoscope className="h-5 w-5" />}
             title={m.nursesTitle}
             blurb={m.nursesBlurb}
             cta={m.nursesCta}
@@ -56,6 +72,7 @@ export default async function Home() {
             tone="blue"
           />
           <PersonaCard
+            icon={<BarChart3 className="h-5 w-5" />}
             title={m.adminsTitle}
             blurb={m.adminsBlurb}
             cta={m.adminsCta}
@@ -68,23 +85,37 @@ export default async function Home() {
       <section className="max-w-5xl mx-auto px-4 sm:px-8 pb-16">
         <Card>
           <CardContent className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium">{m.inboxTitle}</p>
-              <p className="text-xs text-slate-500">{m.inboxBlurb}</p>
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+                <MessageSquare className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-medium">{m.inboxTitle}</p>
+                <p className="text-xs text-slate-500">{m.inboxBlurb}</p>
+              </div>
             </div>
-            <Link href="/demo/sms-inbox">
-              <Button variant="outline">{m.inboxCta}</Button>
+            <Link href="/demo/sms-inbox" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto cursor-pointer">
+                {m.inboxCta}
+              </Button>
             </Link>
           </CardContent>
         </Card>
         <Card className="mt-3">
           <CardContent className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium">{m.lobbyTitle}</p>
-              <p className="text-xs text-slate-500">{m.lobbyBlurb}</p>
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-900 text-white">
+                <Tv className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-medium">{m.lobbyTitle}</p>
+                <p className="text-xs text-slate-500">{m.lobbyBlurb}</p>
+              </div>
             </div>
-            <Link href="/display">
-              <Button variant="outline">{m.lobbyCta}</Button>
+            <Link href="/display" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto cursor-pointer">
+                {m.lobbyCta}
+              </Button>
             </Link>
           </CardContent>
         </Card>
@@ -113,12 +144,14 @@ const TONE_PILL: Record<string, string> = {
 };
 
 function PersonaCard({
+  icon,
   title,
   blurb,
   cta,
   href,
   tone,
 }: {
+  icon: React.ReactNode;
   title: string;
   blurb: string;
   cta: string;
@@ -128,15 +161,19 @@ function PersonaCard({
   return (
     <Link
       href={href}
-      className={`rounded-xl border-2 bg-white p-6 transition-colors ${TONE_BORDER[tone]}`}
+      className={`group rounded-xl border-2 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer ${TONE_BORDER[tone]}`}
     >
-      <p
-        className={`inline-block text-xs uppercase tracking-widest font-medium px-2 py-1 rounded ${TONE_PILL[tone]}`}
+      <div
+        className={`inline-flex items-center gap-2 text-xs uppercase tracking-widest font-medium px-2 py-1 rounded ${TONE_PILL[tone]}`}
       >
+        {icon}
         {title}
-      </p>
+      </div>
       <p className="mt-3 text-sm text-slate-600">{blurb}</p>
-      <p className="mt-4 text-sm font-medium text-slate-900">{cta} →</p>
+      <p className="mt-4 text-sm font-medium text-slate-900 inline-flex items-center gap-1">
+        {cta}
+        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+      </p>
     </Link>
   );
 }

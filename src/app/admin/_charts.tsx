@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Download } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -200,7 +201,8 @@ export function AdminCharts() {
           className="lg:col-span-2"
           action={
             <a href="/api/analytics/export">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="cursor-pointer">
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
                 Export CSV
               </Button>
             </a>

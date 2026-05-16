@@ -1,3 +1,4 @@
+import { LogOut } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { AdminCharts } from "./_charts";
@@ -20,7 +21,10 @@ export default async function AdminPage() {
             await signOut({ redirectTo: "/" });
           }}
         >
-          <Button variant="outline" type="submit">Sign out</Button>
+          <Button variant="outline" type="submit" className="cursor-pointer">
+            <LogOut className="h-4 w-4" aria-hidden="true" />
+            Sign out
+          </Button>
         </form>
       </header>
       <AdminCharts />

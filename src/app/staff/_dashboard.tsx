@@ -221,8 +221,9 @@ export function StaffDashboard() {
                   size="sm"
                   onClick={() => act(t.number, "/api/queue/emergency", { ticketNumber: t.number })}
                   disabled={!!pending}
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto cursor-pointer"
                 >
+                  <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
                   {pending === t.number ? "Bumping…" : "Push to front"}
                 </Button>
               </li>
