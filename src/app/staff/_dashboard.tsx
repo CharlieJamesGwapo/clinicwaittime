@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PriorityBadge, StatusBadge } from "@/lib/labels";
+import * as offline from "@/lib/offline-queue";
+import { OfflineBanner } from "./_offline";
 
 type StaffQueueRow = {
   number: string;
@@ -57,11 +59,20 @@ export function StaffDashboard() {
 
   async function act(label: string, path: string, body?: object) {
     setPending(label);
-    await fetch(path, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      offline.enqueue({ path, body });
+      setPending(null);
+      return;
+    }
+    try {
+      await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      offline.enqueue({ path, body });
+    }
     setPending(null);
   }
 
@@ -72,6 +83,7 @@ export function StaffDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
+      <OfflineBanner />
       <Card className="border-2 border-blue-200 bg-blue-50/40">
         <CardContent className="pt-6">
           <p className="text-xs uppercase tracking-widest text-blue-700 font-medium">
