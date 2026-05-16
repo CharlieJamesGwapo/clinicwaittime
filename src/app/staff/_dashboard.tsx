@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  PhoneCall,
+  CheckCircle2,
+  SkipForward,
+  ArrowUp,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PriorityBadge, StatusBadge } from "@/lib/labels";
@@ -106,30 +113,39 @@ export function StaffDashboard() {
                   </p>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={() => act("complete", "/api/queue/complete")}
                   disabled={!!pending}
+                  className="cursor-pointer"
                 >
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                   {pending === "complete" ? "Completing…" : "Complete"}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => act("skip", "/api/queue/skip")}
                   disabled={!!pending}
+                  className="cursor-pointer"
                 >
+                  <SkipForward className="h-4 w-4" aria-hidden="true" />
                   Skip
                 </Button>
               </div>
             </div>
           ) : (
             <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <p className="text-sm text-slate-500">No active patient.</p>
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <Users className="h-4 w-4" aria-hidden="true" />
+                No active patient.
+              </div>
               <Button
                 onClick={() => act("next", "/api/queue/next")}
                 disabled={!!pending || waiting.length === 0}
                 size="lg"
+                className="cursor-pointer"
               >
+                <PhoneCall className="h-4 w-4" aria-hidden="true" />
                 {pending === "next" ? "Calling…" : "Call Next"}
               </Button>
             </div>
@@ -139,7 +155,9 @@ export function StaffDashboard() {
               <Button
                 onClick={() => act("next", "/api/queue/next")}
                 disabled={!!pending || waiting.length === 0}
+                className="cursor-pointer"
               >
+                <PhoneCall className="h-4 w-4" aria-hidden="true" />
                 {pending === "next" ? "Calling…" : "Complete & call next"}
               </Button>
             </div>
