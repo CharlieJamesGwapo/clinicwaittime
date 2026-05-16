@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Mail, MessageSquare } from "lucide-react";
+import { Mail, MessageSquare, Inbox } from "lucide-react";
 
 type Message = {
   id: string;
@@ -112,10 +112,14 @@ export default function InboxPage() {
         <div className="rounded-[2rem] bg-slate-900 p-3 shadow-2xl">
           <div className="rounded-[1.5rem] bg-white max-h-[70vh] overflow-y-auto p-4 flex flex-col gap-3">
             {filtered.length === 0 && (
-              <div className="py-12 text-center">
-                <p className="text-sm text-slate-400">No messages yet.</p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Check in a patient at /checkin to see one.
+              <div className="py-12 px-4 flex flex-col items-center gap-3 text-center">
+                <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
+                  <Inbox className="h-7 w-7 text-slate-400" aria-hidden="true" />
+                </div>
+                <p className="text-sm font-medium text-slate-700">No messages yet</p>
+                <p className="text-xs text-slate-500 max-w-[28ch]">
+                  Check in a patient at <span className="font-mono">/checkin</span> and the
+                  confirmation will land here in real time.
                 </p>
               </div>
             )}

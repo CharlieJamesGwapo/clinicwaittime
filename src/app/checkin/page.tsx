@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/messages";
+import { ChatWidget } from "@/components/chat-widget";
 import { CheckinForm } from "./_form";
 
 export default async function CheckinPage() {
@@ -17,6 +18,7 @@ export default async function CheckinPage() {
           <CheckinForm locale={locale} labels={m} />
         </div>
       </div>
+      <ChatWidget locale={locale} />
     </main>
   );
 }

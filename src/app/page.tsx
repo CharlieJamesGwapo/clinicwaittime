@@ -15,6 +15,7 @@ import { getServerLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/messages";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { LiveQueuePulse } from "@/components/live-queue-pulse";
+import { ChatWidget } from "@/components/chat-widget";
 
 export default async function Home() {
   const locale = await getServerLocale();
@@ -139,6 +140,7 @@ export default async function Home() {
           <span>{m.footerRight}</span>
         </div>
       </footer>
+      <ChatWidget locale={locale} />
     </main>
   );
 }

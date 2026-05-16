@@ -5,6 +5,8 @@ import { ticketPosition } from "@/lib/queue";
 import { estimateWaitMinutes } from "@/lib/eta";
 import { Card, CardContent } from "@/components/ui/card";
 import { PriorityBadge } from "@/lib/labels";
+import { ChatWidget } from "@/components/chat-widget";
+import { getServerLocale } from "@/lib/i18n/server";
 import { TicketStatusLive } from "./_live";
 
 export default async function TicketPage({
@@ -18,6 +20,7 @@ export default async function TicketPage({
 
   const positionAhead = await ticketPosition(number);
   const eta = await estimateWaitMinutes(positionAhead);
+  const locale = await getServerLocale();
 
   return (
     <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
@@ -55,6 +58,7 @@ export default async function TicketPage({
           </CardContent>
         </Card>
       </div>
+      <ChatWidget locale={locale} />
     </main>
   );
 }

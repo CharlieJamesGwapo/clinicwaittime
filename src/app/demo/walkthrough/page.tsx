@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ChatWidget } from "@/components/chat-widget";
+import { getServerLocale } from "@/lib/i18n/server";
 
 type Step = {
   n: string;
@@ -69,7 +71,8 @@ const STEPS: Step[] = [
   },
 ];
 
-export default function WalkthroughPage() {
+export default async function WalkthroughPage() {
+  const locale = await getServerLocale();
   return (
     <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
       <div className="max-w-3xl mx-auto">
@@ -127,6 +130,7 @@ export default function WalkthroughPage() {
           </CardContent>
         </Card>
       </div>
+      <ChatWidget locale={locale} />
     </main>
   );
 }

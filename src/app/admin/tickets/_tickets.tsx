@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, FormEvent } from "react";
-import { Search, Pencil, Trash2, RefreshCcw } from "lucide-react";
+import { Search, Pencil, Trash2, RefreshCcw, Ticket as TicketIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -225,8 +225,16 @@ export function TicketsAdmin() {
                 ))
               ) : tickets.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-sm text-slate-500 py-8">
-                    No tickets match.
+                  <TableCell colSpan={7} className="py-12">
+                    <div className="flex flex-col items-center gap-3 text-center">
+                      <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
+                        <TicketIcon className="h-7 w-7 text-slate-400" aria-hidden="true" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-700">No tickets match</p>
+                      <p className="text-xs text-slate-500 max-w-[36ch]">
+                        Try clearing a filter, or wait for new check-ins.
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (

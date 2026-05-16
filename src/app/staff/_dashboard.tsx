@@ -249,10 +249,18 @@ export function StaffDashboard() {
 
         {visible.length === 0 ? (
           <Card>
-            <CardContent className="py-10 text-center text-sm text-slate-500">
-              {waiting.length === 0
-                ? "No one in line. ✓"
-                : "No priority tickets right now."}
+            <CardContent className="py-12 flex flex-col items-center gap-3 text-center">
+              <div className="h-14 w-14 rounded-full bg-emerald-50 flex items-center justify-center">
+                <CheckCircle2 className="h-7 w-7 text-emerald-600" aria-hidden="true" />
+              </div>
+              <p className="text-sm font-medium text-slate-700">
+                {waiting.length === 0 ? "Queue clear" : "No priority tickets"}
+              </p>
+              <p className="text-xs text-slate-500 max-w-[36ch]">
+                {waiting.length === 0
+                  ? "Nobody waiting. New check-ins will show up here automatically."
+                  : "Switch the filter to All to see regular waiting tickets."}
+              </p>
             </CardContent>
           </Card>
         ) : (
