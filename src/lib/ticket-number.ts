@@ -9,11 +9,16 @@ export function formatTicketNumber(sequence: number): string {
   return `${letter}-${String(within).padStart(3, "0")}`;
 }
 
-export async function nextTicketNumber(now: Date = new Date()): Promise<string> {
-  const startOfDay = new Date(now);
-  startOfDay.setHours(0, 0, 0, 0);
-  const todayCount = await db.ticket.count({
-    where: { createdAt: { gte: startOfDay } },
-  });
-  return formatTicketNumber(todayCount + 1);
+function parseTicketSequence(number: string): number {
+  const m = number.match(/^([A-Z])-(\d{1,3})$/);
+  if (!m) return 0;
+  const letterIdx = m[1].charCodeAt(0) - "A".charCodeAt(0);
+  const within = parseInt(m[2], 10);
+  return letterIdx * PER_LETTER + within;
+}
+
+export async function nextTicketNumber(): Promise<string> {
+  const all = await db.ticket.findMany({ select: { number: true } });
+  const max = all.reduce((m, t) => Math.max(m, parseTicketSequence(t.number)), 0);
+  return formatTicketNumber(max + 1);
 }
