@@ -10,7 +10,7 @@ export default async function Home() {
   const m = t(locale).landing;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 flex justify-end">
         <LocaleToggle current={locale} />
       </div>

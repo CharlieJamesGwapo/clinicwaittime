@@ -41,7 +41,7 @@ export default function DisplayPage() {
   const waiting = queue.filter((t) => t.status === "WAITING").slice(0, 5);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
+    <main id="main" className="min-h-screen bg-slate-950 text-slate-50 flex flex-col">
       <header className="flex items-center justify-between px-6 sm:px-12 py-4 sm:py-6 border-b border-slate-800">
         <p className="text-sm sm:text-base uppercase tracking-widest text-slate-400">
           Clinic Wait-Time Tracker

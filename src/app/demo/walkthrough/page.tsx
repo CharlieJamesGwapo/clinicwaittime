@@ -71,7 +71,7 @@ const STEPS: Step[] = [
 
 export default function WalkthroughPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
+    <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
       <div className="max-w-3xl mx-auto">
         <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
           ← Back to landing

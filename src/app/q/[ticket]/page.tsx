@@ -20,7 +20,7 @@ export default async function TicketPage({
   const eta = await estimateWaitMinutes(positionAhead);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
+    <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
       <div className="max-w-md mx-auto">
         <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
           ← Back

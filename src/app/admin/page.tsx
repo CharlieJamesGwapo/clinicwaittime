@@ -6,7 +6,7 @@ export default async function AdminPage() {
   const session = await auth();
 
   return (
-    <main className="min-h-screen p-4 sm:p-8 max-w-6xl mx-auto">
+    <main id="main" className="min-h-screen p-4 sm:p-8 max-w-6xl mx-auto">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
