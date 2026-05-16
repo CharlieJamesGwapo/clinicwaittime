@@ -7,6 +7,8 @@ import { renderSms } from "@/lib/sms-templates";
 import { writeSmsLog } from "@/lib/sms";
 import { emitQueueUpdated } from "@/lib/events";
 import { isPriorityType } from "@/lib/types";
+import { isLocale } from "@/lib/i18n/messages";
+import { getServerLocale } from "@/lib/i18n/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -15,13 +17,15 @@ export async function POST(req: NextRequest) {
   const patientName = typeof body.patientName === "string" ? body.patientName.trim() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
   const priorityType = isPriorityType(body.priorityType) ? body.priorityType : "NONE";
+  const requestedLocale = isLocale(body.locale) ? body.locale : null;
+  const locale = requestedLocale ?? (await getServerLocale());
 
   if (!patientName) return NextResponse.json({ error: "Name is required" }, { status: 400 });
   if (!phone) return NextResponse.json({ error: "Phone is required" }, { status: 400 });
 
   const number = await nextTicketNumber();
   const ticket = await db.ticket.create({
-    data: { number, patientName, phone, priorityType },
+    data: { number, patientName, phone, priorityType, locale },
   });
 
   const positionAhead = await ticketPosition(number);
@@ -29,12 +33,16 @@ export async function POST(req: NextRequest) {
 
   const origin = req.nextUrl.origin;
   const statusUrl = `${origin}/q/${number}`;
-  const message = renderSms("checkin", {
-    name: patientName,
-    ticketNumber: number,
-    statusUrl,
-    estimatedWaitMinutes: eta,
-  });
+  const message = renderSms(
+    "checkin",
+    {
+      name: patientName,
+      ticketNumber: number,
+      statusUrl,
+      estimatedWaitMinutes: eta,
+    },
+    locale,
+  );
   await writeSmsLog({ ticketId: ticket.id, phone, message });
   emitQueueUpdated();
 

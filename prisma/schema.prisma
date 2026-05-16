@@ -17,6 +17,7 @@ model Ticket {
   phone        String
   priorityType String    @default("NONE")
   status       String    @default("WAITING")
+  locale       String    @default("en")
   createdAt    DateTime  @default(now())
   calledAt     DateTime?
   servedAt     DateTime?

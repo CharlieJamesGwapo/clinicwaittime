@@ -26,4 +26,16 @@ describe("renderSms", () => {
       "Ticket A-042 — please proceed to consultation now."
     );
   });
+
+  it("renders the check-in confirmation in Tagalog", () => {
+    expect(renderSms("checkin", ctx, "tl")).toBe(
+      "Hi Aling Maria, ticket mo ang A-042. Tantsa ng paghihintay: 45 minuto. Sundan ang status: https://clinic.test/q/A-042"
+    );
+  });
+
+  it("falls back to English for unknown locales (via default param)", () => {
+    expect(renderSms("your-turn", ctx)).toBe(
+      "Ticket A-042 — please proceed to consultation now."
+    );
+  });
 });

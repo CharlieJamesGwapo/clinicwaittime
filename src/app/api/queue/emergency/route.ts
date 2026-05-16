@@ -4,6 +4,7 @@ import { requireStaff } from "@/lib/api-auth";
 import { emitQueueUpdated } from "@/lib/events";
 import { renderSms } from "@/lib/sms-templates";
 import { writeSmsLog } from "@/lib/sms";
+import { isLocale } from "@/lib/i18n/messages";
 
 export async function POST(req: NextRequest) {
   const block = await requireStaff();
@@ -34,12 +35,16 @@ export async function POST(req: NextRequest) {
   await writeSmsLog({
     ticketId: updated.id,
     phone: updated.phone,
-    message: renderSms("your-turn", {
-      name: updated.patientName,
-      ticketNumber: updated.number,
-      statusUrl: `${req.nextUrl.origin}/q/${updated.number}`,
-      estimatedWaitMinutes: 0,
-    }),
+    message: renderSms(
+      "your-turn",
+      {
+        name: updated.patientName,
+        ticketNumber: updated.number,
+        statusUrl: `${req.nextUrl.origin}/q/${updated.number}`,
+        estimatedWaitMinutes: 0,
+      },
+      isLocale(updated.locale) ? updated.locale : "en",
+    ),
   });
 
   emitQueueUpdated();

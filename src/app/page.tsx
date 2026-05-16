@@ -1,29 +1,36 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getServerLocale } from "@/lib/i18n/server";
+import { t } from "@/lib/i18n/messages";
+import { LocaleToggle } from "@/components/locale-toggle";
 
-export default function Home() {
+export default async function Home() {
+  const locale = await getServerLocale();
+  const m = t(locale).landing;
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <section className="max-w-5xl mx-auto px-4 sm:px-8 pt-12 sm:pt-20 pb-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 flex justify-end">
+        <LocaleToggle current={locale} />
+      </div>
+      <section className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 sm:pt-12 pb-12">
         <p className="text-xs uppercase tracking-widest text-emerald-700 font-medium">
-          SDG 3 — Good Health &amp; Well-being
+          {m.sdgTag}
         </p>
         <h1 className="mt-2 text-3xl sm:text-5xl font-semibold tracking-tight">
-          Clinic Wait-Time Tracker
+          {m.title}
         </h1>
         <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl">
-          Real-time queuing and wait-time monitoring for Philippine clinics — so
-          patients can wait at home, not in line, and staff have the data they
-          need to plan their day.
+          {m.blurb}
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/checkin">
-            <Button size="lg">Patient check-in</Button>
+            <Button size="lg">{m.ctaPatient}</Button>
           </Link>
           <Link href="/login">
             <Button size="lg" variant="outline">
-              Staff &amp; admin login
+              {m.ctaLogin}
             </Button>
           </Link>
         </div>
@@ -31,27 +38,27 @@ export default function Home() {
 
       <section className="max-w-5xl mx-auto px-4 sm:px-8 pb-20">
         <h2 className="text-sm uppercase tracking-widest text-slate-500 mb-4">
-          For everyone in the clinic
+          {m.personasHeading}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <PersonaCard
-            title="Patients"
-            blurb="Walk in, scan the QR, get a ticket. We text you when it's almost your turn."
-            cta="Open check-in"
+            title={m.patientsTitle}
+            blurb={m.patientsBlurb}
+            cta={m.patientsCta}
             href="/checkin"
             tone="emerald"
           />
           <PersonaCard
-            title="Nurses"
-            blurb="See who's next, flag emergencies, and call patients with one tap."
-            cta="Staff dashboard"
+            title={m.nursesTitle}
+            blurb={m.nursesBlurb}
+            cta={m.nursesCta}
             href="/staff"
             tone="blue"
           />
           <PersonaCard
-            title="Admins"
-            blurb="Wait-time trends, peak hours, and dropout rate to plan staffing."
-            cta="Admin analytics"
+            title={m.adminsTitle}
+            blurb={m.adminsBlurb}
+            cta={m.adminsCta}
             href="/admin"
             tone="violet"
           />
@@ -62,27 +69,22 @@ export default function Home() {
         <Card>
           <CardContent className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-sm font-medium">See the simulated SMS flow</p>
-              <p className="text-xs text-slate-500">
-                Every notification the system sends lands here in real time —
-                no real SMS, no cost.
-              </p>
+              <p className="text-sm font-medium">{m.inboxTitle}</p>
+              <p className="text-xs text-slate-500">{m.inboxBlurb}</p>
             </div>
             <Link href="/demo/sms-inbox">
-              <Button variant="outline">Open inbox</Button>
+              <Button variant="outline">{m.inboxCta}</Button>
             </Link>
           </CardContent>
         </Card>
         <Card className="mt-3">
           <CardContent className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-sm font-medium">Lobby display</p>
-              <p className="text-xs text-slate-500">
-                Fullscreen &ldquo;Now Serving&rdquo; for a waiting-room TV.
-              </p>
+              <p className="text-sm font-medium">{m.lobbyTitle}</p>
+              <p className="text-xs text-slate-500">{m.lobbyBlurb}</p>
             </div>
             <Link href="/display">
-              <Button variant="outline">Open display</Button>
+              <Button variant="outline">{m.lobbyCta}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -90,8 +92,8 @@ export default function Home() {
 
       <footer className="border-t bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-8 py-6 text-xs text-slate-500 flex flex-wrap justify-between gap-2">
-          <span>IS70 / ISS170 Technopreneurship — Activity Deliverable</span>
-          <span>Built with Next.js 16 · Prisma · NextAuth</span>
+          <span>{m.footerLeft}</span>
+          <span>{m.footerRight}</span>
         </div>
       </footer>
     </main>
