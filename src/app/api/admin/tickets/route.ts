@@ -44,6 +44,7 @@ export async function GET(req: NextRequest) {
         channel: true,
         priorityType: true,
         status: true,
+        reason: true,
         createdAt: true,
         calledAt: true,
         completedAt: true,

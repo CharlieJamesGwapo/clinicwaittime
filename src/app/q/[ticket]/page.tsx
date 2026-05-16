@@ -43,6 +43,12 @@ export default async function TicketPage({
               initialPositionAhead={positionAhead}
               initialEstimatedWaitMinutes={eta}
             />
+            {ticket.reason && (
+              <div className="w-full rounded-lg bg-slate-50 border border-slate-200 p-3">
+                <p className="text-xs uppercase tracking-widest text-slate-500">Reason for visit</p>
+                <p className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{ticket.reason}</p>
+              </div>
+            )}
             <p className="text-xs text-slate-400 text-center">
               Updates automatically — keep this page open.
             </p>

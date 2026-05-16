@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -39,6 +40,7 @@ type Ticket = {
   channel: string;
   priorityType: PriorityType;
   status: TicketStatus;
+  reason: string | null;
   createdAt: string;
   calledAt: string | null;
   completedAt: string | null;
@@ -226,6 +228,14 @@ export function TicketsAdmin() {
                       <div className="text-xs text-slate-500">
                         {t.channel === "EMAIL" ? t.email : t.phone}
                       </div>
+                      {t.reason && (
+                        <div
+                          className="text-xs text-slate-500 mt-1 max-w-[24ch] truncate"
+                          title={t.reason}
+                        >
+                          {t.reason}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-xs uppercase tracking-wider text-slate-500">
                       {t.channel}
@@ -353,6 +363,7 @@ function EditTicketDialog({
   const [patientName, setPatientName] = useState(ticket?.patientName ?? "");
   const [phone, setPhone] = useState(ticket?.phone ?? "");
   const [email, setEmail] = useState(ticket?.email ?? "");
+  const [reason, setReason] = useState(ticket?.reason ?? "");
   const [priorityType, setPriorityType] = useState<PriorityType>(ticket?.priorityType ?? "NONE");
   const [status, setStatus] = useState<TicketStatus>(ticket?.status ?? "WAITING");
   const [error, setError] = useState<string | null>(null);
@@ -363,6 +374,7 @@ function EditTicketDialog({
       setPatientName(ticket.patientName);
       setPhone(ticket.phone);
       setEmail(ticket.email ?? "");
+      setReason(ticket.reason ?? "");
       setPriorityType(ticket.priorityType);
       setStatus(ticket.status);
       setError(null);
@@ -379,7 +391,7 @@ function EditTicketDialog({
     const res = await fetch(`/api/admin/tickets/${ticket.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ patientName, phone, email, priorityType, status }),
+      body: JSON.stringify({ patientName, phone, email, reason, priorityType, status }),
     });
     setPending(false);
     if (!res.ok) {
@@ -411,6 +423,17 @@ function EditTicketDialog({
               <Label htmlFor="t-email">Email</Label>
               <Input id="t-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="t-reason">Reason for visit</Label>
+            <Textarea
+              id="t-reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              maxLength={500}
+              className="resize-none"
+            />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-2">

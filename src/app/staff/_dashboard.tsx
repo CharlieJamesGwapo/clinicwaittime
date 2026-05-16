@@ -7,6 +7,7 @@ import {
   SkipForward,
   ArrowUp,
   Users,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,8 +19,11 @@ type StaffQueueRow = {
   number: string;
   patientName: string;
   phone: string;
+  email: string | null;
+  channel: string;
   priorityType: string;
   status: string;
+  reason: string | null;
   createdAt: string;
   calledAt: string | null;
 };
@@ -111,6 +115,16 @@ export function StaffDashboard() {
                   <p className="text-xs text-slate-500 mt-1">
                     Called {timeAgo(current.calledAt)}
                   </p>
+                )}
+                {current.reason && (
+                  <div className="mt-2 rounded-md bg-white border border-blue-200 p-2">
+                    <p className="text-[10px] uppercase tracking-widest text-blue-700 font-medium">
+                      Reason for visit
+                    </p>
+                    <p className="text-sm text-slate-700 mt-0.5 whitespace-pre-wrap">
+                      {current.reason}
+                    </p>
+                  </div>
                 )}
               </div>
               <div className="flex gap-2 flex-wrap">
@@ -211,6 +225,15 @@ export function StaffDashboard() {
                     <p className="text-sm text-slate-600 truncate">
                       {t.patientName}
                     </p>
+                    {t.reason && (
+                      <p
+                        className="text-xs text-slate-500 mt-0.5 line-clamp-1 inline-flex items-center gap-1"
+                        title={t.reason}
+                      >
+                        <FileText className="h-3 w-3 shrink-0" aria-hidden="true" />
+                        <span className="truncate">{t.reason}</span>
+                      </p>
+                    )}
                     <p className="text-xs text-slate-400">
                       Waiting {timeAgo(t.createdAt)}
                     </p>

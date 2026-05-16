@@ -19,6 +19,7 @@ export async function GET(
     patientName: ticket.patientName,
     status: ticket.status,
     priorityType: ticket.priorityType,
+    reason: ticket.reason,
     positionAhead,
     estimatedWaitMinutes: eta,
     createdAt: ticket.createdAt,

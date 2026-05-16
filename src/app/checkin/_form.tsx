@@ -6,6 +6,7 @@ import { MessageSquare, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Locale } from "@/lib/i18n/messages";
 
@@ -21,6 +22,9 @@ type Labels = {
   channelSmsDesc: string;
   channelEmail: string;
   channelEmailDesc: string;
+  reason: string;
+  reasonHelp: string;
+  reasonPlaceholder: string;
   priority: string;
   priorityNone: string;
   priorityNoneDesc: string;
@@ -39,6 +43,7 @@ export function CheckinForm({ locale, labels }: { locale: Locale; labels: Labels
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [reason, setReason] = useState("");
   const [channel, setChannel] = useState<"SMS" | "EMAIL">("SMS");
   const [priorityType, setPriorityType] = useState("NONE");
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +69,7 @@ export function CheckinForm({ locale, labels }: { locale: Locale; labels: Labels
         email: channel === "EMAIL" ? email : "",
         channel,
         priorityType,
+        reason,
         locale,
       }),
     });
@@ -177,6 +183,25 @@ export function CheckinForm({ locale, labels }: { locale: Locale; labels: Labels
               />
             </div>
           )}
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="reason">{labels.reason}</Label>
+            <Textarea
+              id="reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder={labels.reasonPlaceholder}
+              rows={3}
+              maxLength={500}
+              className="text-base resize-none"
+            />
+            <p className="text-xs text-slate-500 -mt-1">
+              {labels.reasonHelp}
+              {reason.length > 0 && (
+                <span className="float-right tabular">{reason.length}/500</span>
+              )}
+            </p>
+          </div>
 
           <fieldset className="flex flex-col gap-2">
             <legend className="text-sm font-medium mb-1">{labels.priority}</legend>

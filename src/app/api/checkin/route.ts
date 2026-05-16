@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
   const patientName = typeof body.patientName === "string" ? body.patientName.trim() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
+  const reason = typeof body.reason === "string" ? body.reason.trim().slice(0, 500) : "";
   const priorityType = isPriorityType(body.priorityType) ? body.priorityType : "NONE";
   const channel: Channel = isChannel(body.channel) ? body.channel : "SMS";
   const requestedLocale = isLocale(body.locale) ? body.locale : null;
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
       channel,
       priorityType,
       locale,
+      reason: reason || null,
     },
   });
 

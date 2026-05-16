@@ -19,6 +19,7 @@ export async function PATCH(
   if (typeof body.patientName === "string") data.patientName = body.patientName.trim();
   if (typeof body.phone === "string") data.phone = body.phone.trim();
   if (typeof body.email === "string") data.email = body.email.trim() || null;
+  if (typeof body.reason === "string") data.reason = body.reason.trim().slice(0, 500) || null;
   if (isPriorityType(body.priorityType)) data.priorityType = body.priorityType;
   if (isTicketStatus(body.status)) {
     data.status = body.status;
