@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Mail, MessageSquare, Inbox } from "lucide-react";
+import { subscribeQueueUpdates } from "@/lib/subscribe-queue";
 
 type Message = {
   id: string;
@@ -33,7 +34,6 @@ export default function InboxPage() {
 
   useEffect(() => {
     let cancelled = false;
-
     const refresh = async () => {
       try {
         const res = await fetch("/api/sms-log", { cache: "no-store" });
@@ -44,16 +44,10 @@ export default function InboxPage() {
         /* retry */
       }
     };
-
-    refresh();
-
-    const es = new EventSource("/api/queue/stream");
-    es.addEventListener("queue_updated", refresh);
-    es.addEventListener("ready", refresh);
-
+    const unsubscribe = subscribeQueueUpdates(refresh);
     return () => {
       cancelled = true;
-      es.close();
+      unsubscribe();
     };
   }, []);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, FormEvent } from "react";
-import { Search, Pencil, Trash2, RefreshCcw, Ticket as TicketIcon } from "lucide-react";
+import { Search, Pencil, Trash2, RefreshCcw, Ticket as TicketIcon, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -61,6 +62,9 @@ export function TicketsAdmin() {
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<Ticket | null>(null);
   const [deleting, setDeleting] = useState<Ticket | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkConfirm, setBulkConfirm] = useState<"delete" | "reset" | null>(null);
+  const [bulkPending, setBulkPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const params = useMemo(() => {
@@ -93,6 +97,65 @@ export function TicketsAdmin() {
   useEffect(() => {
     setPage(0);
   }, [q, statusFilter, priorityFilter, channelFilter]);
+
+  useEffect(() => {
+    // Drop selections that aren't in the current page
+    setSelected((prev) => {
+      const next = new Set<string>();
+      for (const t of tickets) if (prev.has(t.id)) next.add(t.id);
+      return next;
+    });
+  }, [tickets]);
+
+  const allOnPageSelected = tickets.length > 0 && tickets.every((t) => selected.has(t.id));
+  const someOnPageSelected = !allOnPageSelected && tickets.some((t) => selected.has(t.id));
+
+  function toggleAll() {
+    setSelected((prev) => {
+      if (allOnPageSelected) {
+        const next = new Set(prev);
+        for (const t of tickets) next.delete(t.id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const t of tickets) next.add(t.id);
+      return next;
+    });
+  }
+
+  function toggleOne(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function runBulk(action: "delete" | "reset") {
+    setBulkPending(true);
+    const ids = Array.from(selected);
+    const res = await fetch("/api/admin/tickets/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, ids }),
+    });
+    setBulkPending(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      toast.error(data.error ?? "Bulk action failed");
+      return;
+    }
+    const data = await res.json();
+    toast.success(
+      action === "delete"
+        ? `Deleted ${data.deleted} tickets`
+        : `Reset ${data.reset} tickets to WAITING`,
+    );
+    setSelected(new Set());
+    setBulkConfirm(null);
+    load();
+  }
 
   async function remove(t: Ticket) {
     const res = await fetch(`/api/admin/tickets/${t.id}`, { method: "DELETE" });
@@ -196,11 +259,61 @@ export function TicketsAdmin() {
         </CardContent>
       </Card>
 
+      {selected.size > 0 && (
+        <div className="sticky top-0 z-10 rounded-lg bg-slate-900 text-white px-4 py-3 flex items-center justify-between gap-3 shadow-md">
+          <p className="text-sm font-medium">
+            {selected.size} selected
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSelected(new Set())}
+              className="cursor-pointer bg-transparent text-white border-slate-700 hover:bg-slate-800 hover:text-white"
+            >
+              Clear
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setBulkConfirm("reset")}
+              disabled={bulkPending}
+              className="cursor-pointer bg-transparent text-white border-slate-700 hover:bg-slate-800 hover:text-white"
+            >
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              Reset to WAITING
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setBulkConfirm("delete")}
+              disabled={bulkPending}
+              className="cursor-pointer bg-rose-600 hover:bg-rose-700"
+            >
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Delete
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardContent className="p-0 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[1%]">
+                  <Checkbox
+                    checked={allOnPageSelected}
+                    onCheckedChange={toggleAll}
+                    aria-label={
+                      allOnPageSelected
+                        ? "Deselect all"
+                        : someOnPageSelected
+                          ? "Select remaining"
+                          : "Select all tickets on this page"
+                    }
+                  />
+                </TableHead>
                 <TableHead>Ticket</TableHead>
                 <TableHead>Patient</TableHead>
                 <TableHead>Channel</TableHead>
@@ -225,7 +338,7 @@ export function TicketsAdmin() {
                 ))
               ) : tickets.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12">
+                  <TableCell colSpan={8} className="py-12">
                     <div className="flex flex-col items-center gap-3 text-center">
                       <div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center">
                         <TicketIcon className="h-7 w-7 text-slate-400" aria-hidden="true" />
@@ -239,7 +352,14 @@ export function TicketsAdmin() {
                 </TableRow>
               ) : (
                 tickets.map((t) => (
-                  <TableRow key={t.id}>
+                  <TableRow key={t.id} data-state={selected.has(t.id) ? "selected" : undefined}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(t.id)}
+                        onCheckedChange={() => toggleOne(t.id)}
+                        aria-label={`Select ticket ${t.number}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-mono">{t.number}</TableCell>
                     <TableCell>
                       <div className="font-medium">{t.patientName}</div>
@@ -339,6 +459,53 @@ export function TicketsAdmin() {
           load();
         }}
       />
+
+      <Dialog open={!!bulkConfirm} onOpenChange={(o) => !o && setBulkConfirm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {bulkConfirm === "delete"
+                ? `Delete ${selected.size} ticket${selected.size === 1 ? "" : "s"}?`
+                : `Reset ${selected.size} ticket${selected.size === 1 ? "" : "s"} to WAITING?`}
+            </DialogTitle>
+            <DialogDescription>
+              {bulkConfirm === "delete"
+                ? "This permanently removes the selected tickets and their notification log entries."
+                : "Status, calledAt, and completedAt will be cleared. Notifications already sent are not undone."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setBulkConfirm(null)}
+              disabled={bulkPending}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => bulkConfirm && runBulk(bulkConfirm)}
+              disabled={bulkPending}
+              className={
+                bulkConfirm === "delete"
+                  ? "bg-rose-600 hover:bg-rose-700 cursor-pointer"
+                  : "cursor-pointer"
+              }
+            >
+              {bulkConfirm === "delete" ? (
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              )}
+              {bulkPending
+                ? "Working…"
+                : bulkConfirm === "delete"
+                  ? "Delete"
+                  : "Reset"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
         <DialogContent>

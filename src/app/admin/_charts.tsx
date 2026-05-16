@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CountUp } from "@/components/count-up";
+import { subscribeQueueUpdates } from "@/lib/subscribe-queue";
 
 type Analytics = {
   waitTimeTrend: { day: string; averageWaitMinutes: number; sampleSize: number }[];
@@ -44,7 +45,6 @@ export function AdminCharts() {
 
   useEffect(() => {
     let cancelled = false;
-
     const load = async () => {
       try {
         const res = await fetch("/api/analytics", { cache: "no-store" });
@@ -55,18 +55,13 @@ export function AdminCharts() {
           setLoading(false);
         }
       } catch {
-        /* retry on next event */
+        /* retry */
       }
     };
-
-    load();
-
-    const es = new EventSource("/api/queue/stream");
-    es.addEventListener("queue_updated", load);
-
+    const unsubscribe = subscribeQueueUpdates(load);
     return () => {
       cancelled = true;
-      es.close();
+      unsubscribe();
     };
   }, []);
 

@@ -6,6 +6,9 @@ import { DefaultChatTransport } from "ai";
 import { MessageCircle, Send, X, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Note: chat widget intentionally does NOT subscribe to queue events — it
+// fetches via /api/chat tool calls only.
+
 const SUGGESTIONS = [
   { en: "How do I check in?", tl: "Paano mag-check-in?" },
   { en: "What counts as priority?", tl: "Ano ang priority?" },

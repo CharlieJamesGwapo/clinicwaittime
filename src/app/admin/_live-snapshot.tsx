@@ -6,6 +6,7 @@ import { ArrowRight, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/lib/labels";
+import { subscribeQueueUpdates } from "@/lib/subscribe-queue";
 
 type Row = { number: string; status: string; priorityType: string };
 
@@ -14,7 +15,6 @@ export function LiveSnapshot() {
 
   useEffect(() => {
     let cancelled = false;
-
     const refresh = async () => {
       try {
         const res = await fetch("/api/queue", { cache: "no-store" });
@@ -25,13 +25,10 @@ export function LiveSnapshot() {
         /* retry */
       }
     };
-    refresh();
-    const es = new EventSource("/api/queue/stream");
-    es.addEventListener("queue_updated", refresh);
-    es.addEventListener("ready", refresh);
+    const unsubscribe = subscribeQueueUpdates(refresh);
     return () => {
       cancelled = true;
-      es.close();
+      unsubscribe();
     };
   }, []);
 

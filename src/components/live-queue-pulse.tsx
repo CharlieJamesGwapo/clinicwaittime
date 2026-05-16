@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { subscribeQueueUpdates } from "@/lib/subscribe-queue";
 
 type QueueRow = { number: string; status: string };
 
@@ -9,7 +10,6 @@ export function LiveQueuePulse({ label }: { label: string }) {
 
   useEffect(() => {
     let cancelled = false;
-
     const refresh = async () => {
       try {
         const res = await fetch("/api/queue", { cache: "no-store" });
@@ -23,14 +23,10 @@ export function LiveQueuePulse({ label }: { label: string }) {
         /* retry */
       }
     };
-
-    refresh();
-    const es = new EventSource("/api/queue/stream");
-    es.addEventListener("queue_updated", refresh);
-    es.addEventListener("ready", refresh);
+    const unsubscribe = subscribeQueueUpdates(refresh);
     return () => {
       cancelled = true;
-      es.close();
+      unsubscribe();
     };
   }, []);
 

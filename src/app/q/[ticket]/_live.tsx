@@ -1,13 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, BellOff } from "lucide-react";
+import { Bell, BellOff, X } from "lucide-react";
+import { toast } from "sonner";
 import { StatusBadge } from "@/lib/labels";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   playChime,
   requestNotificationPermission,
   showCalledNotification,
 } from "@/lib/notify-sound";
+import { subscribeQueueUpdates } from "@/lib/subscribe-queue";
 
 type Props = {
   number: string;
@@ -34,6 +45,8 @@ export function TicketStatusLive(props: Props) {
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
     "default",
   );
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const prevStatus = useRef(props.initialStatus);
 
   useEffect(() => {
@@ -59,7 +72,6 @@ export function TicketStatusLive(props: Props) {
 
   useEffect(() => {
     let cancelled = false;
-
     const refresh = async () => {
       try {
         const res = await fetch(`/api/ticket/${props.number}`, { cache: "no-store" });
@@ -70,17 +82,13 @@ export function TicketStatusLive(props: Props) {
         setPosition(data.positionAhead);
         setEta(data.estimatedWaitMinutes);
       } catch {
-        /* retry next event */
+        /* retry */
       }
     };
-
-    const es = new EventSource("/api/queue/stream");
-    es.addEventListener("queue_updated", refresh);
-    es.addEventListener("ready", refresh);
-
+    const unsubscribe = subscribeQueueUpdates(refresh);
     return () => {
       cancelled = true;
-      es.close();
+      unsubscribe();
     };
   }, [props.number]);
 
@@ -120,36 +128,91 @@ export function TicketStatusLive(props: Props) {
         {STATUS_MESSAGE[status] ?? "Status updated."}
       </p>
 
-      {permission !== "unsupported" && isActive && status === "WAITING" && (
-        <button
-          type="button"
-          onClick={() => {
-            const next = !soundOn;
-            setSoundOn(next);
-            if (next) {
-              playChime();
-              requestNotificationPermission();
-              if (typeof window !== "undefined" && "Notification" in window) {
-                setPermission(Notification.permission);
-              }
-            }
-          }}
-          className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
-          aria-pressed={soundOn}
-        >
-          {soundOn ? (
-            <>
-              <Bell className="h-3.5 w-3.5" aria-hidden="true" />
-              Sound on — chime when called
-            </>
-          ) : (
-            <>
-              <BellOff className="h-3.5 w-3.5" aria-hidden="true" />
-              Sound off
-            </>
+      {status === "WAITING" && (
+        <div className="flex flex-col items-center gap-2 w-full">
+          {permission !== "unsupported" && (
+            <button
+              type="button"
+              onClick={() => {
+                const next = !soundOn;
+                setSoundOn(next);
+                if (next) {
+                  playChime();
+                  requestNotificationPermission();
+                  if (typeof window !== "undefined" && "Notification" in window) {
+                    setPermission(Notification.permission);
+                  }
+                }
+              }}
+              className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+              aria-pressed={soundOn}
+            >
+              {soundOn ? (
+                <>
+                  <Bell className="h-3.5 w-3.5" aria-hidden="true" />
+                  Sound on — chime when called
+                </>
+              ) : (
+                <>
+                  <BellOff className="h-3.5 w-3.5" aria-hidden="true" />
+                  Sound off
+                </>
+              )}
+            </button>
           )}
-        </button>
+          <button
+            type="button"
+            onClick={() => setConfirmCancel(true)}
+            className="text-xs text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
+          >
+            Cancel my ticket
+          </button>
+        </div>
       )}
+
+      <Dialog open={confirmCancel} onOpenChange={(o) => !o && setConfirmCancel(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel your ticket?</DialogTitle>
+            <DialogDescription>
+              Ticket <span className="font-mono">{props.number}</span> will be removed from
+              the queue. If you change your mind, you can check in again at the desk.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmCancel(false)}
+              disabled={cancelling}
+              className="cursor-pointer"
+            >
+              Keep my ticket
+            </Button>
+            <Button
+              onClick={async () => {
+                setCancelling(true);
+                const res = await fetch(`/api/ticket/${props.number}/cancel`, {
+                  method: "POST",
+                });
+                setCancelling(false);
+                if (!res.ok) {
+                  const data = await res.json().catch(() => ({}));
+                  toast.error(data.error ?? "Cancel failed");
+                  return;
+                }
+                toast.success("Ticket cancelled");
+                setConfirmCancel(false);
+                setStatus("DROPOUT");
+              }}
+              disabled={cancelling}
+              className="bg-rose-600 hover:bg-rose-700 cursor-pointer"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+              {cancelling ? "Cancelling…" : "Cancel ticket"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

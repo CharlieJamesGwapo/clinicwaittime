@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PriorityBadge, StatusBadge } from "@/lib/labels";
 import * as offline from "@/lib/offline-queue";
+import { subscribeQueueUpdates } from "@/lib/subscribe-queue";
 import { OfflineBanner } from "./_offline";
 
 type StaffQueueRow = {
@@ -47,7 +48,6 @@ export function StaffDashboard() {
 
   useEffect(() => {
     let cancelled = false;
-
     const refresh = async () => {
       try {
         const res = await fetch("/api/queue", { cache: "no-store" });
@@ -61,16 +61,10 @@ export function StaffDashboard() {
         /* retry */
       }
     };
-
-    refresh();
-
-    const es = new EventSource("/api/queue/stream");
-    es.addEventListener("queue_updated", refresh);
-    es.addEventListener("ready", refresh);
-
+    const unsubscribe = subscribeQueueUpdates(refresh);
     return () => {
       cancelled = true;
-      es.close();
+      unsubscribe();
     };
   }, []);
 
