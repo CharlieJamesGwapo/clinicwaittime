@@ -16,6 +16,7 @@ import { t } from "@/lib/i18n/messages";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { LiveQueuePulse } from "@/components/live-queue-pulse";
 import { ChatWidget } from "@/components/chat-widget";
+import { FindMyTicket } from "@/components/find-my-ticket";
 
 export default async function Home() {
   const locale = await getServerLocale();
@@ -60,6 +61,14 @@ export default async function Home() {
               {m.ctaLogin}
             </Button>
           </Link>
+        </div>
+        <div className="mt-8">
+          <FindMyTicket
+            label={m.findTicketLabel}
+            placeholder={m.findTicketPlaceholder}
+            cta={m.findTicketCta}
+            notFound={m.findTicketNotFound}
+          />
         </div>
       </section>
 

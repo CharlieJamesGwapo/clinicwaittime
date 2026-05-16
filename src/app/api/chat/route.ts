@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
-import { streamText, convertToModelMessages, type UIMessage } from "ai";
+import { streamText, convertToModelMessages, tool, stepCountIs, type UIMessage } from "ai";
 import { gateway } from "@ai-sdk/gateway";
+import { z } from "zod";
+import { orderedQueue } from "@/lib/queue";
+import { estimateWaitMinutes } from "@/lib/eta";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -27,6 +30,9 @@ HOW TO BEHAVE
 - For medical questions, refuse politely and recommend the patient speak with the clinic nurse. Never give diagnoses, treatment advice, or dosage information.
 - For information you genuinely don't know (specific clinic hours, doctors on duty, prices), say so honestly and suggest they ask at the front desk.
 
+TOOLS
+- You have a getQueueStatus tool that returns the LIVE queue state: who is being served right now, how many are waiting, how many of those are priority, and the estimated wait if someone joined the back of the line this moment. Use it whenever the user asks about timing, the live queue, who is up, or how long until they are seen. Quote the numbers concisely (e.g. "About 30 minutes — 2 people ahead of you including 1 priority").
+
 Stay friendly, calm, and professional. This is a healthcare context.`;
 
 export async function POST(req: NextRequest) {
@@ -52,6 +58,29 @@ export async function POST(req: NextRequest) {
       messages: modelMessages,
       temperature: 0.4,
       maxOutputTokens: 400,
+      stopWhen: stepCountIs(3),
+      tools: {
+        getQueueStatus: tool({
+          description:
+            "Read the current clinic queue: how many patients are waiting, how many of those are priority, who is being served right now, and the estimated wait for someone joining at the end of the line. Call this when the user asks about wait time, queue length, who's next, or anything time-sensitive about the live state.",
+          inputSchema: z.object({}),
+          execute: async () => {
+            const queue = await orderedQueue();
+            const waiting = queue.filter((t) => t.status === "WAITING");
+            const priorityWaiting = waiting.filter((t) => t.priorityType !== "NONE");
+            const serving = queue.find(
+              (t) => t.status === "CALLED" || t.status === "SERVING",
+            );
+            const estimatedJoinWaitMinutes = await estimateWaitMinutes(waiting.length);
+            return {
+              servingTicket: serving?.number ?? null,
+              waitingCount: waiting.length,
+              priorityWaitingCount: priorityWaiting.length,
+              estimatedWaitMinutesIfYouJoinNow: estimatedJoinWaitMinutes,
+            };
+          },
+        }),
+      },
     });
 
     return result.toUIMessageStreamResponse();

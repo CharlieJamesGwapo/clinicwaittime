@@ -36,6 +36,10 @@ const messages = {
       footerLeft: "IS70 / ISS170 Technopreneurship — Activity Deliverable",
       footerRight: "Built with Next.js 16 · Prisma · NextAuth",
       livePulse: "patients waiting now",
+      findTicketLabel: "Already checked in?",
+      findTicketPlaceholder: "Phone or email",
+      findTicketCta: "Find",
+      findTicketNotFound: "No ticket found for that phone or email.",
     },
     checkin: {
       back: "Back",
@@ -116,6 +120,10 @@ const messages = {
       footerLeft: "IS70 / ISS170 Technopreneurship — Activity Deliverable",
       footerRight: "Ginawa gamit ang Next.js 16 · Prisma · NextAuth",
       livePulse: "pasyente sa pila ngayon",
+      findTicketLabel: "Nag-check-in ka na?",
+      findTicketPlaceholder: "Telepono o email",
+      findTicketCta: "Hanapin",
+      findTicketNotFound: "Walang ticket para sa numero o email na iyan.",
     },
     checkin: {
       back: "Bumalik",

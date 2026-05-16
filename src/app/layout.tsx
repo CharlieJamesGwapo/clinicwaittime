@@ -21,6 +21,17 @@ export const metadata: Metadata = {
   title: "Clinic Wait-Time Tracker",
   description:
     "Real-time queuing and wait-time monitoring for Philippine clinics — SDG 3, IS70/ISS170 Technopreneurship.",
+  manifest: "/manifest.webmanifest",
+  themeColor: "#1e40af",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Clinic Wait",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
+import QRCode from "qrcode";
 import { db } from "@/lib/db";
 import { ticketPosition } from "@/lib/queue";
 import { estimateWaitMinutes } from "@/lib/eta";
@@ -21,6 +23,16 @@ export default async function TicketPage({
   const positionAhead = await ticketPosition(number);
   const eta = await estimateWaitMinutes(positionAhead);
   const locale = await getServerLocale();
+
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const ticketUrl = `${proto}://${host}/q/${ticket.number}`;
+  const qrDataUrl = await QRCode.toDataURL(ticketUrl, {
+    width: 240,
+    margin: 1,
+    color: { dark: "#0f172a", light: "#ffffff" },
+  });
 
   return (
     <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white px-4 py-8 sm:py-16">
@@ -52,6 +64,28 @@ export default async function TicketPage({
                 <p className="text-sm text-slate-700 mt-1 whitespace-pre-wrap">{ticket.reason}</p>
               </div>
             )}
+
+            <details className="w-full group">
+              <summary className="text-xs text-slate-500 hover:text-slate-900 transition-colors cursor-pointer text-center list-none">
+                <span className="inline-flex items-center gap-1">
+                  Show QR for staff
+                  <span className="transition-transform group-open:rotate-90" aria-hidden="true">›</span>
+                </span>
+              </summary>
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <img
+                  src={qrDataUrl}
+                  alt={`QR code for ticket ${ticket.number}`}
+                  width={180}
+                  height={180}
+                  className="rounded-lg border bg-white p-2"
+                />
+                <p className="text-[10px] text-slate-400 font-mono break-all text-center max-w-[260px]">
+                  {ticketUrl}
+                </p>
+              </div>
+            </details>
+
             <p className="text-xs text-slate-400 text-center">
               Updates automatically — keep this page open.
             </p>

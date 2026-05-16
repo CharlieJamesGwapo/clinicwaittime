@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Bell, BellOff } from "lucide-react";
 import { StatusBadge } from "@/lib/labels";
+import {
+  playChime,
+  requestNotificationPermission,
+  showCalledNotification,
+} from "@/lib/notify-sound";
 
 type Props = {
   number: string;
@@ -24,14 +30,32 @@ export function TicketStatusLive(props: Props) {
   const [position, setPosition] = useState(props.initialPositionAhead);
   const [eta, setEta] = useState(props.initialEstimatedWaitMinutes);
   const [pulseKey, setPulseKey] = useState(0);
+  const [soundOn, setSoundOn] = useState(true);
+  const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
+    "default",
+  );
   const prevStatus = useRef(props.initialStatus);
 
   useEffect(() => {
-    if (status !== prevStatus.current) {
-      prevStatus.current = status;
-      setPulseKey((k) => k + 1);
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setPermission(Notification.permission);
+    } else {
+      setPermission("unsupported");
     }
-  }, [status]);
+  }, []);
+
+  useEffect(() => {
+    if (status === prevStatus.current) return;
+    const wasInactive =
+      prevStatus.current === "WAITING" || prevStatus.current === "DONE";
+    const becameCalled = status === "CALLED" || status === "SERVING";
+    if (wasInactive && becameCalled && soundOn) {
+      playChime();
+      showCalledNotification(props.number).catch(() => {});
+    }
+    prevStatus.current = status;
+    setPulseKey((k) => k + 1);
+  }, [status, soundOn, props.number]);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +119,37 @@ export function TicketStatusLive(props: Props) {
       >
         {STATUS_MESSAGE[status] ?? "Status updated."}
       </p>
+
+      {permission !== "unsupported" && isActive && status === "WAITING" && (
+        <button
+          type="button"
+          onClick={() => {
+            const next = !soundOn;
+            setSoundOn(next);
+            if (next) {
+              playChime();
+              requestNotificationPermission();
+              if (typeof window !== "undefined" && "Notification" in window) {
+                setPermission(Notification.permission);
+              }
+            }
+          }}
+          className="inline-flex items-center gap-2 text-xs text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+          aria-pressed={soundOn}
+        >
+          {soundOn ? (
+            <>
+              <Bell className="h-3.5 w-3.5" aria-hidden="true" />
+              Sound on — chime when called
+            </>
+          ) : (
+            <>
+              <BellOff className="h-3.5 w-3.5" aria-hidden="true" />
+              Sound off
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
