@@ -1,15 +1,17 @@
 import { db } from "@/lib/db";
 import { orderedQueue } from "@/lib/queue";
 import { estimateWaitMinutes } from "@/lib/eta";
-import { renderSms, type SmsKind } from "@/lib/sms-templates";
-import { writeSmsLog } from "@/lib/sms";
+import { renderNotification, type SmsKind } from "@/lib/sms-templates";
+import { writeNotification } from "@/lib/sms";
 import { type Locale, isLocale } from "@/lib/i18n/messages";
+import { isChannel, type Channel } from "@/lib/types";
 
 interface NotifyParams {
   ticketId: string;
   ticketNumber: string;
   patientName: string;
-  phone: string;
+  channel: Channel;
+  recipient: string;
   locale: Locale;
   kind: SmsKind;
   statusUrl: string;
@@ -18,7 +20,8 @@ interface NotifyParams {
 
 async function notify(p: NotifyParams) {
   const eta = await estimateWaitMinutes(p.positionAhead);
-  const message = renderSms(
+  const message = renderNotification(
+    p.channel,
     p.kind,
     {
       name: p.patientName,
@@ -28,7 +31,21 @@ async function notify(p: NotifyParams) {
     },
     p.locale,
   );
-  await writeSmsLog({ ticketId: p.ticketId, phone: p.phone, message });
+  await writeNotification({
+    ticketId: p.ticketId,
+    channel: p.channel,
+    recipient: p.recipient,
+    message,
+  });
+}
+
+function ticketRecipient(t: { channel: string; email: string | null; phone: string }): {
+  channel: Channel;
+  recipient: string;
+} {
+  const channel: Channel = isChannel(t.channel) ? t.channel : "SMS";
+  const recipient = channel === "EMAIL" ? t.email ?? t.phone : t.phone;
+  return { channel, recipient };
 }
 
 export async function closeCurrentCalled(): Promise<void> {
@@ -50,11 +67,13 @@ export async function callNextWaiting(origin: string): Promise<{
     data: { status: "CALLED", calledAt: new Date() },
   });
 
+  const { channel, recipient } = ticketRecipient(updated);
   await notify({
     ticketId: updated.id,
     ticketNumber: updated.number,
     patientName: updated.patientName,
-    phone: updated.phone,
+    channel,
+    recipient,
     locale: isLocale(updated.locale) ? updated.locale : "en",
     kind: "your-turn",
     statusUrl: `${origin}/q/${updated.number}`,
@@ -66,11 +85,13 @@ export async function callNextWaiting(origin: string): Promise<{
   if (twoAway) {
     const row = await db.ticket.findUnique({ where: { number: twoAway.number } });
     if (row) {
+      const r = ticketRecipient(row);
       await notify({
         ticketId: row.id,
         ticketNumber: row.number,
         patientName: row.patientName,
-        phone: row.phone,
+        channel: r.channel,
+        recipient: r.recipient,
         locale: isLocale(row.locale) ? row.locale : "en",
         kind: "almost",
         statusUrl: `${origin}/q/${row.number}`,

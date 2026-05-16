@@ -15,6 +15,8 @@ model Ticket {
   number       String    @unique
   patientName  String
   phone        String
+  email        String?
+  channel      String    @default("SMS") // SMS | EMAIL
   priorityType String    @default("NONE")
   status       String    @default("WAITING")
   locale       String    @default("en")
@@ -33,12 +35,14 @@ model User {
 }
 
 model SmsLog {
-  id       String   @id @default(uuid())
-  ticketId String
-  ticket   Ticket   @relation(fields: [ticketId], references: [id])
-  phone    String
-  message  String
-  sentAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  channel   String   @default("SMS") // SMS | EMAIL
+  recipient String   @default("") // phone or email
+  phone     String   // legacy field kept for backward compat
+  message   String
+  sentAt    DateTime @default(now())
 }
 
 model Setting {

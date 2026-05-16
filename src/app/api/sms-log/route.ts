@@ -11,6 +11,8 @@ export async function GET() {
     messages: rows.map((r) => ({
       id: r.id,
       ticketNumber: r.ticket.number,
+      channel: r.channel || "SMS",
+      recipient: r.recipient || r.phone,
       phone: r.phone,
       message: r.message,
       sentAt: r.sentAt,

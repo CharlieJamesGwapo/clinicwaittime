@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireStaff } from "@/lib/api-auth";
 import { emitQueueUpdated } from "@/lib/events";
-import { renderSms } from "@/lib/sms-templates";
-import { writeSmsLog } from "@/lib/sms";
+import { renderNotification } from "@/lib/sms-templates";
+import { writeNotification } from "@/lib/sms";
 import { isLocale } from "@/lib/i18n/messages";
+import { isChannel, type Channel } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   const block = await requireStaff();
@@ -32,10 +33,15 @@ export async function POST(req: NextRequest) {
     data: { status: "CALLED", calledAt: new Date() },
   });
 
-  await writeSmsLog({
+  const channel: Channel = isChannel(updated.channel) ? updated.channel : "SMS";
+  const recipient = channel === "EMAIL" ? updated.email ?? updated.phone : updated.phone;
+
+  await writeNotification({
     ticketId: updated.id,
-    phone: updated.phone,
-    message: renderSms(
+    channel,
+    recipient,
+    message: renderNotification(
+      channel,
       "your-turn",
       {
         name: updated.patientName,
