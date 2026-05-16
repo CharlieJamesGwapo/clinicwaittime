@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -59,9 +60,11 @@ export function SettingsAdmin() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Save failed" }));
       setError(data.error ?? "Save failed");
+      toast.error(data.error ?? "Save failed");
       return;
     }
     setSavedAt(key);
+    toast.success(`Saved ${key}`);
     setTimeout(() => setSavedAt(null), 2500);
     load();
   }
@@ -73,9 +76,11 @@ export function SettingsAdmin() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Delete failed" }));
       setError(data.error ?? "Delete failed");
+      toast.error(data.error ?? "Delete failed");
       return;
     }
     setDeleting(null);
+    toast.success(`Removed ${s.key}`);
     load();
   }
 
@@ -212,8 +217,10 @@ function CreateSettingDialog({
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Create failed" }));
       setError(data.error ?? "Create failed");
+      toast.error(data.error ?? "Create failed");
       return;
     }
+    toast.success(`Added ${key}`);
     setKey("");
     setValue("");
     onCreated();

@@ -19,6 +19,8 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CountUp } from "@/components/count-up";
 
 type Analytics = {
   waitTimeTrend: { day: string; averageWaitMinutes: number; sampleSize: number }[];
@@ -70,8 +72,28 @@ export function AdminCharts() {
 
   if (loading || !data) {
     return (
-      <div className="grid place-items-center py-20">
-        <p className="text-sm text-muted-foreground">Loading analytics…</p>
+      <div className="flex flex-col gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="pt-6 space-y-3">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-3 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[0, 1, 2].map((i) => (
+            <Card key={i} className={i === 2 ? "lg:col-span-2" : ""}>
+              <CardContent className="pt-6 space-y-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-64 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
@@ -98,11 +120,19 @@ export function AdminCharts() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Tickets (7d)" value={data.total} tone="default" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 fade-in">
+        <StatCard
+          label="Tickets (7d)"
+          value={<CountUp value={data.total} />}
+          tone="default"
+        />
         <StatCard
           label="Avg wait"
-          value={`${avgWaitOverall} min`}
+          value={
+            <>
+              <CountUp value={avgWaitOverall} /> min
+            </>
+          }
           tone="default"
         />
         <StatCard
@@ -113,7 +143,11 @@ export function AdminCharts() {
         />
         <StatCard
           label="Priority share"
-          value={`${priorityPct}%`}
+          value={
+            <>
+              <CountUp value={priorityPct} />%
+            </>
+          }
           tone="default"
           subline="PWD + Senior + Pregnant"
         />
@@ -315,7 +349,7 @@ function StatCard({
   tone,
 }: {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   subline?: string;
   tone: "default" | "warn";
 }) {

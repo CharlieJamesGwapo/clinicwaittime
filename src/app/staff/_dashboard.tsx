@@ -9,8 +9,10 @@ import {
   Users,
   FileText,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PriorityBadge, StatusBadge } from "@/lib/labels";
 import * as offline from "@/lib/offline-queue";
 import { OfflineBanner } from "./_offline";
@@ -39,6 +41,7 @@ function timeAgo(iso: string): string {
 
 export function StaffDashboard() {
   const [queue, setQueue] = useState<StaffQueueRow[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "PRIORITY">("ALL");
   const [pending, setPending] = useState<string | null>(null);
 
@@ -50,7 +53,10 @@ export function StaffDashboard() {
         const res = await fetch("/api/queue", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
-        if (!cancelled) setQueue(data.queue);
+        if (!cancelled) {
+          setQueue(data.queue);
+          setLoaded(true);
+        }
       } catch {
         /* retry */
       }
@@ -68,21 +74,42 @@ export function StaffDashboard() {
     };
   }, []);
 
+  const TOASTS: Record<string, { ok: string; err: string }> = {
+    next: { ok: "Next patient called", err: "Couldn't call next" },
+    complete: { ok: "Consultation marked complete", err: "Couldn't complete" },
+    skip: { ok: "Patient skipped — next called", err: "Couldn't skip" },
+  };
+
   async function act(label: string, path: string, body?: object) {
     setPending(label);
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       offline.enqueue({ path, body });
+      toast.info("Offline — action queued", {
+        description: "Will sync when reconnected.",
+      });
       setPending(null);
       return;
     }
     try {
-      await fetch(path, {
+      const res = await fetch(path, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: body ? JSON.stringify(body) : undefined,
       });
+      if (res.ok) {
+        const t = TOASTS[label];
+        if (t) toast.success(t.ok);
+        else if (label.startsWith("A-") || label.startsWith("B-")) {
+          toast.success(`Ticket ${label} pushed to front`);
+        }
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const t = TOASTS[label];
+        toast.error(data.error ?? t?.err ?? "Action failed");
+      }
     } catch {
       offline.enqueue({ path, body });
+      toast.info("Offline — action queued");
     }
     setPending(null);
   }
@@ -91,6 +118,28 @@ export function StaffDashboard() {
   const waiting = queue.filter((t) => t.status === "WAITING");
   const visible =
     filter === "PRIORITY" ? waiting.filter((t) => t.priorityType !== "NONE") : waiting;
+
+  if (!loaded) {
+    return (
+      <div className="flex flex-col gap-6">
+        <OfflineBanner />
+        <Card className="border-2 border-blue-200 bg-blue-50/40">
+          <CardContent className="pt-6 space-y-3">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-10 w-40" />
+          </CardContent>
+        </Card>
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-40" />
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-16 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

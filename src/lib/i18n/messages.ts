@@ -35,6 +35,7 @@ const messages = {
       lobbyCta: "Open display",
       footerLeft: "IS70 / ISS170 Technopreneurship — Activity Deliverable",
       footerRight: "Built with Next.js 16 · Prisma · NextAuth",
+      livePulse: "patients waiting now",
     },
     checkin: {
       back: "Back",
@@ -114,6 +115,7 @@ const messages = {
       lobbyCta: "Buksan ang display",
       footerLeft: "IS70 / ISS170 Technopreneurship — Activity Deliverable",
       footerRight: "Ginawa gamit ang Next.js 16 · Prisma · NextAuth",
+      livePulse: "pasyente sa pila ngayon",
     },
     checkin: {
       back: "Bumalik",

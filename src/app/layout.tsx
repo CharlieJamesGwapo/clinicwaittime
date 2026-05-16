@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fira_Sans, Fira_Code } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const firaSans = Fira_Sans({
@@ -40,6 +41,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         {children}
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );

@@ -2,8 +2,10 @@
 
 import { useEffect, useState, FormEvent } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -53,9 +55,11 @@ export function UsersAdmin() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Delete failed" }));
       setError(data.error ?? "Delete failed");
+      toast.error(data.error ?? "Delete failed");
       return;
     }
     setDeleting(null);
+    toast.success(`Deleted ${u.email}`);
     load();
   }
 
@@ -90,11 +94,13 @@ export function UsersAdmin() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-sm text-slate-500 py-8">
-                    Loading…
-                  </TableCell>
-                </TableRow>
+                [0, 1, 2].map((i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-32 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
               ) : users.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-sm text-slate-500 py-8">
@@ -216,8 +222,10 @@ function CreateUserDialog({
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Create failed" }));
       setError(data.error ?? "Create failed");
+      toast.error(data.error ?? "Create failed");
       return;
     }
+    toast.success(`Added ${email}`);
     setEmail("");
     setPassword("");
     setRole("STAFF");
@@ -336,8 +344,10 @@ function EditUserDialog({
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Update failed" }));
       setError(data.error ?? "Update failed");
+      toast.error(data.error ?? "Update failed");
       return;
     }
+    toast.success("User updated");
     onSaved();
   }
 

@@ -14,20 +14,32 @@ import { Button } from "@/components/ui/button";
 import { getServerLocale } from "@/lib/i18n/server";
 import { t } from "@/lib/i18n/messages";
 import { LocaleToggle } from "@/components/locale-toggle";
+import { LiveQueuePulse } from "@/components/live-queue-pulse";
 
 export default async function Home() {
   const locale = await getServerLocale();
   const m = t(locale).landing;
 
   return (
-    <main id="main" className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 flex justify-end">
+    <main id="main" className="relative min-h-screen bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-gradient-to-br from-blue-400/30 to-emerald-300/20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-40 -left-24 h-80 w-80 rounded-full bg-gradient-to-tr from-violet-300/20 to-amber-200/20 blur-3xl"
+      />
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-8 pt-6 flex justify-end">
         <LocaleToggle current={locale} />
       </div>
-      <section className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 sm:pt-12 pb-12">
-        <p className="text-xs uppercase tracking-widest text-emerald-700 font-medium">
-          {m.sdgTag}
-        </p>
+      <section className="relative max-w-5xl mx-auto px-4 sm:px-8 pt-6 sm:pt-12 pb-12">
+        <div className="flex flex-wrap items-center gap-3 mb-2">
+          <p className="text-xs uppercase tracking-widest text-emerald-700 font-medium">
+            {m.sdgTag}
+          </p>
+          <LiveQueuePulse label={m.livePulse} />
+        </div>
         <h1 className="mt-2 text-3xl sm:text-5xl font-semibold tracking-tight">
           {m.title}
         </h1>

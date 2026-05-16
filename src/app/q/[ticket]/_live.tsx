@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StatusBadge } from "@/lib/labels";
 
 type Props = {
@@ -23,6 +23,15 @@ export function TicketStatusLive(props: Props) {
   const [status, setStatus] = useState(props.initialStatus);
   const [position, setPosition] = useState(props.initialPositionAhead);
   const [eta, setEta] = useState(props.initialEstimatedWaitMinutes);
+  const [pulseKey, setPulseKey] = useState(0);
+  const prevStatus = useRef(props.initialStatus);
+
+  useEffect(() => {
+    if (status !== prevStatus.current) {
+      prevStatus.current = status;
+      setPulseKey((k) => k + 1);
+    }
+  }, [status]);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +65,9 @@ export function TicketStatusLive(props: Props) {
 
   return (
     <div className="w-full flex flex-col items-center gap-6">
-      <StatusBadge status={status} />
+      <span key={pulseKey} className="inline-flex rounded-full badge-pulse">
+        <StatusBadge status={status} />
+      </span>
 
       {isActive && (
         <div className="w-full grid grid-cols-2 gap-3">

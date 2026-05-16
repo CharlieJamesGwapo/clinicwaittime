@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState, FormEvent } from "react";
 import { Search, Pencil, Trash2, RefreshCcw } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -97,9 +99,11 @@ export function TicketsAdmin() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Delete failed" }));
       setError(data.error ?? "Delete failed");
+      toast.error(data.error ?? "Delete failed");
       return;
     }
     setDeleting(null);
+    toast.success(`Deleted ticket ${t.number}`);
     load();
   }
 
@@ -208,11 +212,17 @@ export function TicketsAdmin() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-sm text-slate-500 py-8">
-                    Loading…
-                  </TableCell>
-                </TableRow>
+                [0, 1, 2, 3].map((i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                  </TableRow>
+                ))
               ) : tickets.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center text-sm text-slate-500 py-8">
@@ -397,8 +407,10 @@ function EditTicketDialog({
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Update failed" }));
       setError(data.error ?? "Update failed");
+      toast.error(data.error ?? "Update failed");
       return;
     }
+    toast.success(`Ticket ${ticket.number} updated`);
     onSaved();
   }
 

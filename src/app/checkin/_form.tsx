@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquare, Mail } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,9 +78,13 @@ export function CheckinForm({ locale, labels }: { locale: Locale; labels: Labels
     if (!res.ok) {
       const body = await res.json().catch(() => ({ error: "Request failed" }));
       setError(body.error ?? "Request failed");
+      toast.error(body.error ?? "Request failed");
       return;
     }
     const { ticket } = await res.json();
+    toast.success(`Ticket ${ticket.number} created`, {
+      description: "We'll notify you when it's almost your turn.",
+    });
     router.push(`/q/${ticket.number}`);
   }
 

@@ -25,7 +25,7 @@ export default async function TicketPage({
         <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">
           ← Back
         </Link>
-        <Card className="mt-4">
+        <Card className="mt-4 fade-in">
           <CardContent className="pt-6 pb-8 flex flex-col items-center gap-6">
             <div className="text-center">
               <p className="text-xs uppercase tracking-widest text-slate-500">Your ticket</p>
