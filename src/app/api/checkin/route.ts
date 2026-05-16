@@ -33,19 +33,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Phone is required for SMS notifications" }, { status: 400 });
   }
 
-  const number = await nextTicketNumber();
-  const ticket = await db.ticket.create({
-    data: {
-      number,
-      patientName,
-      phone: phone || email, // keep non-null on legacy column
-      email: email || null,
-      channel,
-      priorityType,
-      locale,
-      reason: reason || null,
-    },
-  });
+  const cancelToken = crypto.randomUUID();
+
+  // Retry on unique-constraint races when two patients check in at the same
+  // millisecond and both compute the same number. After 5 retries surface a
+  // 503 so the caller knows to retry rather than the user seeing a silent fail.
+  let ticket: Awaited<ReturnType<typeof db.ticket.create>> | null = null;
+  let lastErr: unknown = null;
+  let number = "";
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    number = await nextTicketNumber();
+    try {
+      ticket = await db.ticket.create({
+        data: {
+          number,
+          patientName,
+          phone: phone || email, // keep non-null on legacy column
+          email: email || null,
+          channel,
+          priorityType,
+          locale,
+          reason: reason || null,
+          cancelToken,
+        },
+      });
+      break;
+    } catch (err) {
+      lastErr = err;
+      // P2002 = Unique constraint violation in Prisma
+      const code = (err as { code?: string })?.code;
+      if (code !== "P2002") throw err;
+      // small backoff then try again with a fresh max+1
+      await new Promise((r) => setTimeout(r, 20 + attempt * 30));
+    }
+  }
+  if (!ticket) {
+    console.error("checkin: could not assign unique ticket number", lastErr);
+    return NextResponse.json(
+      { error: "Clinic is very busy — please try again in a moment." },
+      { status: 503 },
+    );
+  }
 
   const positionAhead = await ticketPosition(number);
   const eta = await estimateWaitMinutes(positionAhead);
@@ -71,5 +99,15 @@ export async function POST(req: NextRequest) {
   });
   emitQueueUpdated();
 
-  return NextResponse.json({ ticket }, { status: 201 });
+  const res = NextResponse.json({ ticket }, { status: 201 });
+  // Scope cookie to /q so it travels with the ticket page and the cancel API,
+  // but not other paths. HttpOnly so JS can't read or steal it.
+  res.cookies.set(`tkt_${number}`, cancelToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 12, // 12 hours
+  });
+  return res;
 }

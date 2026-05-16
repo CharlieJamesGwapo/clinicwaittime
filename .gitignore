@@ -31,7 +31,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (template is committed, real values are not)
-.env*
 !.env.example
 
 # vercel
@@ -48,3 +47,4 @@ next-env.d.ts
 /prisma/dev.db-journal
 
 .env*.local
+config.bat

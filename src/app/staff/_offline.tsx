@@ -6,7 +6,7 @@ import * as queue from "@/lib/offline-queue";
 export function OfflineBanner() {
   const [online, setOnline] = useState(true);
   const [pending, setPending] = useState(0);
-  const [lastReplay, setLastReplay] = useState<{ ok: number; failed: number } | null>(null);
+  const [lastReplay, setLastReplay] = useState<{ ok: number; failed: number; kept: number } | null>(null);
 
   useEffect(() => {
     if (typeof navigator !== "undefined") setOnline(navigator.onLine);
@@ -15,7 +15,7 @@ export function OfflineBanner() {
     const onOnline = async () => {
       setOnline(true);
       const result = await queue.replay();
-      setPending(0);
+      setPending(result.kept);
       setLastReplay(result);
       setTimeout(() => setLastReplay(null), 6000);
     };
@@ -41,7 +41,13 @@ export function OfflineBanner() {
     return (
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm p-3 mb-4">
         Synced {lastReplay.ok} queued action{lastReplay.ok === 1 ? "" : "s"}
-        {lastReplay.failed ? `, ${lastReplay.failed} failed (server rejected)` : ""}.
+        {lastReplay.failed
+          ? `, ${lastReplay.failed} rejected by server (discarded)`
+          : ""}
+        {lastReplay.kept
+          ? `, ${lastReplay.kept} kept to retry`
+          : ""}
+        .
       </div>
     );
   }

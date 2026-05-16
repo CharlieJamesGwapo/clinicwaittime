@@ -67,7 +67,10 @@ const STEPS: Step[] = [
     title: "Swap to real SMS in production",
     blurb:
       "The simulated channel is a single function: writeSmsLog() in src/lib/sms.ts. To go live with Semaphore / Twilio / your provider, swap that function to call their API and the rest of the app keeps working unchanged. See the README for the exact change.",
-    cta: { href: "https://github.com", label: "See architecture notes" },
+    cta: {
+      href: "https://github.com/CharlieJamesGwapo/clinicwaittime#how-the-simulated-sms-works-and-how-to-swap-to-real-sms",
+      label: "See architecture notes",
+    },
   },
 ];
 

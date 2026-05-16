@@ -21,6 +21,7 @@ model Ticket {
   status       String    @default("WAITING")
   locale       String    @default("en")
   reason       String? // Patient's reason for visit
+  cancelToken  String? // Random token issued at check-in; required to self-cancel
   createdAt    DateTime  @default(now())
   calledAt     DateTime?
   servedAt     DateTime?

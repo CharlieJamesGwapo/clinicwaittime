@@ -37,10 +37,11 @@ export function clear(): void {
   write([]);
 }
 
-export async function replay(): Promise<{ ok: number; failed: number }> {
+export async function replay(): Promise<{ ok: number; failed: number; kept: number }> {
   const all = read();
   let ok = 0;
   let failed = 0;
+  const survivors: QueuedAction[] = [];
   for (const a of all) {
     try {
       const res = await fetch(a.path, {
@@ -48,12 +49,20 @@ export async function replay(): Promise<{ ok: number; failed: number }> {
         headers: { "Content-Type": "application/json" },
         body: a.body ? JSON.stringify(a.body) : undefined,
       });
-      if (res.ok) ok += 1;
-      else failed += 1;
+      if (res.ok) {
+        ok += 1;
+      } else if (res.status >= 400 && res.status < 500) {
+        // 4xx is a permanent server-side rejection (e.g. ticket already
+        // DONE). Don't keep retrying these on every reconnect.
+        failed += 1;
+      } else {
+        survivors.push(a);
+      }
     } catch {
-      failed += 1;
+      // Network-level failure — keep for next reconnect.
+      survivors.push(a);
     }
   }
-  clear();
-  return { ok, failed };
+  write(survivors);
+  return { ok, failed, kept: survivors.length };
 }
